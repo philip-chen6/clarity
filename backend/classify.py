@@ -27,7 +27,7 @@ def classify_pill(image_path):
         return f"Error: Image file not found at {image_path}"
 
     # Make the API call
-    response = model.generate_content(["Analyze the image and describe the pill shown. What are its physical characteristics (shape, color)? What text or numbers are imprinted on it? Based *only* on the visual information, what medication does the imprint suggest this might be? Frame the response as a visual analysis, not medical advice.", img])
+    response = model.generate_content(["Analyze the image and describe the pill shown. What are its physical characteristics (shape, color)? What text or numbers are imprinted on it? Based *only* on the visual information, what medication does the imprint suggest this might be? If you can't tell what the pill is, give your best guess. Frame the response as a visual analysis, not medical advice.", img])
 
     return response.text
 
