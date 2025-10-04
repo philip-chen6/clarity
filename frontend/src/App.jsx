@@ -6,13 +6,21 @@ import { MdOutlineSpaceBar } from 'react-icons/md';
 import LiquidGlass from './LiquidGlass';
 import DarkVeil from './DarkVeil';
 import ModelViewer from './ModelViewer';
+import Workflow from './Workflow'; // Import the new component
 
 function App() {
   const [isFadingOut, setIsFadingOut] = useState(false);
+  const [currentView, setCurrentView] = useState(window.location.hash);
 
   useEffect(() => {
+    const handleHashChange = () => {
+      setCurrentView(window.location.hash);
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+
     const handleKeyDown = (e) => {
-      if (e.code === 'Space') {
+      if (e.code === 'Space' && currentView !== '#workflow') {
         e.preventDefault();
         setIsFadingOut(true);
       }
@@ -21,9 +29,14 @@ function App() {
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
+      window.removeEventListener('hashchange', handleHashChange);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [currentView]);
+
+  if (currentView === '#workflow') {
+    return <Workflow />;
+  }
 
   return (
     <motion.div
