@@ -10,7 +10,7 @@ mp_hands = mp.solutions.hands
 # Use the high-level "solutions" API for hand tracking
 hands = mp_hands.Hands(
     static_image_mode=False,
-    max_num_hands=1, # Focus on one hand for a clearer bounding box
+    max_num_hands=2, # Focus on one hand for a clearer bounding box
     min_detection_confidence=0.5)
 
 # --- OpenCV Setup ---
@@ -43,34 +43,33 @@ while True:
     frame = cv2.cvtColor(rgb_frame, cv2.COLOR_RGB2BGR)
 
     if results.multi_hand_landmarks:
-        # We'll process only the first hand detected
-        hand_landmarks = results.multi_hand_landmarks[0]
-        
-        # 1. Draw the hand landmarks (the "dots")
-        mp_drawing.draw_landmarks(
-            frame,
-            hand_landmarks,
-            mp_hands.HAND_CONNECTIONS)
+        # Loop through every hand that was detected
+        for hand_landmarks in results.multi_hand_landmarks:
+            # 1. Draw the hand landmarks (the "dots")
+            mp_drawing.draw_landmarks(
+                frame,
+                hand_landmarks,
+                mp_hands.HAND_CONNECTIONS)
 
-        # 2. Calculate and draw the bounding box around the hand
-        x_min, y_min = frame_width, frame_height
-        x_max, y_max = 0, 0
-        for landmark in hand_landmarks.landmark:
-            x, y = int(landmark.x * frame_width), int(landmark.y * frame_height)
-            if x < x_min: x_min = x
-            if x > x_max: x_max = x
-            if y < y_min: y_min = y
-            if y > y_max: y_max = y
-        
-        # Add some padding to the box
-        padding = 20
-        x_min -= padding
-        y_min -= padding
-        x_max += padding
-        y_max += padding
+            # 2. Calculate and draw the bounding box around the hand
+            x_min, y_min = frame_width, frame_height
+            x_max, y_max = 0, 0
+            for landmark in hand_landmarks.landmark:
+                x, y = int(landmark.x * frame_width), int(landmark.y * frame_height)
+                if x < x_min: x_min = x
+                if x > x_max: x_max = x
+                if y < y_min: y_min = y
+                if y > y_max: y_max = y
+            
+            # Add some padding to the box
+            padding = 20
+            x_min -= padding
+            y_min -= padding
+            x_max += padding
+            y_max += padding
 
-        # Draw the bounding box
-        cv2.rectangle(frame, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
+            # Draw the bounding box
+            cv2.rectangle(frame, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
 
     cv2.imshow('Hand and Pill Detector', frame)
 
