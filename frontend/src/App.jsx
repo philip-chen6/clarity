@@ -6,6 +6,7 @@ import { MdOutlineSpaceBar } from 'react-icons/md';
 import LiquidGlass from './LiquidGlass';
 import DarkVeil from './DarkVeil';
 import ModelViewer from './ModelViewer';
+import SplashCursor from './SplashCursor';
 
 function App() {
   const [isFadingOut, setIsFadingOut] = useState(false);
@@ -25,68 +26,77 @@ function App() {
     };
   }, []);
 
+  const appVariants = {
+    initial: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 1 } }, // 1s fade-in
+    hidden: { opacity: 0, transition: { duration: 0.5 } }  // 0.5s fade-out
+  };
+
   return (
-    <motion.div
-      className="App"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: isFadingOut ? 0 : 1 }}
-      transition={{ duration: 1 }}
-      onAnimationComplete={() => {
-        if (isFadingOut) {
-          window.location.hash = 'workflow';
-        }
-      }}
-    >
-      <div className="dark-veil-background">
-        <DarkVeil
-          speed={1.3}
-          hueShift={35}
-          noiseIntensity={0.2}
-          scanlineFrequency={5}
-          scanlineIntensity={0.51}
-          warpAmount={5}
-        />
-      </div>
-      <div className="left-panel">
-        <Orb hoverIntensity={0.8}>
-          <ModelViewer
-            url="/pill.glb"
-            width={400}
-            height={400}
-            defaultZoom={1.5}
-            autoRotate
-            enableManualRotation={true}
-            enableManualZoom={true}
-            showScreenshotButton={false}
-            environmentPreset="none"
-            keyLightIntensity={2.5}
-            rimLightIntensity={1.5}
-            enableMouseParallax
-            enableHoverRotation
+    <>
+      <SplashCursor SPLAT_RADIUS={0.05} />
+      <motion.div
+        className="App"
+        variants={appVariants}
+        initial="initial"
+        animate={isFadingOut ? 'hidden' : 'visible'}
+        onAnimationComplete={() => {
+          if (isFadingOut) {
+            window.location.hash = 'workflow';
+          }
+        }}
+      >
+        <div className="dark-veil-background">
+          <DarkVeil
+            speed={1.3}
+            hueShift={35}
+            noiseIntensity={0.2}
+            scanlineFrequency={5}
+            scanlineIntensity={0.51}
+            warpAmount={5}
           />
-        </Orb>
-      </div>
-      <div className="right-panel">
-        <div className="content">
-          <h1 className="title">CLARITY</h1>
-          <p className="subtitle">a rapid pill identification system</p>
-          <motion.div
-            className="prompt"
-            animate={{ y: [0, -10, 0] }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              repeatType: 'loop',
-              ease: 'easeInOut',
-            }}
-          >
-            <LiquidGlass>
-              press <MdOutlineSpaceBar /> to continue
-            </LiquidGlass>
-          </motion.div>
         </div>
-      </div>
-    </motion.div>
+        <div className="left-panel">
+          <Orb hoverIntensity={0.8}>
+            <ModelViewer
+              url="/pill.glb"
+              width={400}
+              height={400}
+              defaultZoom={1.5}
+              autoRotate
+              enableManualRotation={true}
+              enableManualZoom={true}
+              showScreenshotButton={false}
+              environmentPreset="none"
+              keyLightIntensity={2.5}
+              rimLightIntensity={1.5}
+              enableMouseParallax
+              enableHoverRotation
+            />
+          </Orb>
+        </div>
+        <div className="right-panel">
+          <div className="content">
+            <h1 className="title">CLARITY</h1>
+            <p className="subtitle">a rapid pill identification system</p>
+            <motion.div
+              className="prompt"
+              animate={{ y: [0, -10, 0] }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                repeatType: 'loop',
+                ease: 'easeInOut',
+              }}
+            >
+              <LiquidGlass>
+                press <MdOutlineSpaceBar /> to continue
+              </LiquidGlass>
+            </motion.div>
+          </div>
+        </div>
+      </motion.div>
+    </>
   );
 }
 
