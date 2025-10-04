@@ -4,11 +4,12 @@
   overflow: hidden;
   display: flex;
   align-items: center;
-  position: relative; /* Add relative positioning to contain absolute children */
+  justify-content: center; /* Center the panels */
+  position: relative;
 }
 
 .dark-veil-background {
-  position: fixed; /* Use fixed to cover the viewport */
+  position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
@@ -17,19 +18,19 @@
 }
 
 .left-panel {
-  width: 50vw;
+  width: 40vw; /* Reduced width */
   height: 100vh;
-  z-index: 1; /* Ensure panels are above the veil */
+  z-index: 1;
 }
 
 .right-panel {
-  width: 50vw;
+  width: 40vw; /* Reduced width */
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: center;
-  z-index: 1; /* Ensure panels are above the veil */
+  z-index: 1;
 }
 
 .content {
