@@ -1,0 +1,48 @@
+.glass-search-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.glass-search {
+  position: relative;
+  border-radius: 50px; /* Pill shape */
+  overflow: hidden;
+  padding: 1.5rem 2.5rem; /* Taller container */
+}
+
+.glass-filter,
+.glass-overlay,
+.glass-specular {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.glass-filter {
+  z-index: 1;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.glass-overlay {
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.glass-specular {
+  z-index: 3;
+  box-shadow: inset 1px 1px 1px rgba(255, 255, 255, 0.4);
+}
+
+.glass-content {
+  position: relative;
+  z-index: 4;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  white-space: nowrap; /* Prevent text from wrapping */
+}
