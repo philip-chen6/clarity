@@ -22,9 +22,5 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  pointer-events: none; /* Allow mouse events to pass through to the orb canvas */
-}
-
-.orb-content > * {
-  pointer-events: auto; /* Re-enable pointer events for the model viewer itself */
+  pointer-events: none; /* Allow mouse events to pass through */
 }

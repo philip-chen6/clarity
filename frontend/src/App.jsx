@@ -20,7 +20,7 @@ function App() {
         />
       </div>
       <div className="left-panel">
-        <Orb>
+        <Orb hoverIntensity={0.8}>
           <ModelViewer
             url="/pill.glb"
             width={400}
@@ -30,7 +30,11 @@ function App() {
             enableManualRotation={false}
             enableManualZoom={false}
             showScreenshotButton={false}
-            environmentPreset="none"
+            environmentPreset="sunset"
+            keyLightIntensity={2.5}
+            rimLightIntensity={1.5}
+            enableMouseParallax
+            enableHoverRotation
           />
         </Orb>
       </div>
