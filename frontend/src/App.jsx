@@ -65,7 +65,7 @@ function App() {
                 url="/pill.glb"
                 width={400}
                 height={400}
-                defaultZoom={1.5}
+                defaultZoom={1.67}
                 autoRotate
                 enableManualRotation={true}
                 enableManualZoom={true}
