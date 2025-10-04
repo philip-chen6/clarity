@@ -112,7 +112,7 @@ const Workflow = () => {
       const handleClassify = async () => {
         const payload = { front_image: imgFront.split(',')[1], back_image: imgBack.split(',')[1] };
         try {
-          const response = await fetch('http://127.0.0.1:5001/classify', {
+          const response = await fetch('http://127.0.0.1:5000/classify', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
