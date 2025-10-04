@@ -24,3 +24,7 @@
   align-items: center;
   pointer-events: none; /* Allow mouse events to pass through */
 }
+
+.orb-content > * {
+  pointer-events: auto; /* Re-enable pointer events for the model viewer */
+}

@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import Orb from './Orb';
 import './App.css';
 import { motion } from 'framer-motion';
@@ -7,8 +8,35 @@ import DarkVeil from './DarkVeil';
 import ModelViewer from './ModelViewer';
 
 function App() {
+  const [isFadingOut, setIsFadingOut] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        setIsFadingOut(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   return (
-    <div className="App">
+    <motion.div
+      className="App"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: isFadingOut ? 0 : 1 }}
+      transition={{ duration: 1 }}
+      onAnimationComplete={() => {
+        if (isFadingOut) {
+          window.location.hash = 'workflow';
+        }
+      }}
+    >
       <div className="dark-veil-background">
         <DarkVeil
           speed={1.3}
@@ -27,10 +55,10 @@ function App() {
             height={400}
             defaultZoom={1.5}
             autoRotate
-            enableManualRotation={false}
-            enableManualZoom={false}
+            enableManualRotation={true}
+            enableManualZoom={true}
             showScreenshotButton={false}
-            environmentPreset="sunset"
+            environmentPreset="none"
             keyLightIntensity={2.5}
             rimLightIntensity={1.5}
             enableMouseParallax
@@ -58,7 +86,7 @@ function App() {
           </motion.div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
