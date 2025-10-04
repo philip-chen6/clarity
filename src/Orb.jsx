@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Renderer, Program, Mesh, Triangle, Vec3 } from 'ogl';
 import './Orb.css';
 
-export default function Orb({ hue = 0, hoverIntensity = 0.2, rotateOnHover = true, forceHoverState = false }) {
+export default function Orb({ children, hue = 0, hoverIntensity = 0.2, rotateOnHover = true, forceHoverState = false }) {
   const ctnDom = useRef(null);
 
   const vert = /* glsl */ `
@@ -266,5 +266,10 @@ export default function Orb({ hue = 0, hoverIntensity = 0.2, rotateOnHover = tru
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hue, hoverIntensity, rotateOnHover, forceHoverState]);
 
-  return <div ref={ctnDom} className="orb-container" />;
+  return (
+    <div className="orb-wrapper">
+      <div ref={ctnDom} className="orb-container" />
+      <div className="orb-content">{children}</div>
+    </div>
+  );
 }
