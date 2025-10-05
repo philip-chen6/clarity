@@ -112,6 +112,18 @@
   -webkit-backdrop-filter: blur(4px);
 }
 
+.instruction-prompt.snap-prompt {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  color: #000;
+}
+
+.instruction-prompt.snap-prompt .keyboard-key {
+  background: rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  color: #000;
+}
+
 .keyboard-key {
   display: inline-block;
   padding: 0.3rem 0.6rem;
@@ -124,7 +136,7 @@
 
 .controls-container {
   position: absolute;
-  right: 0;
+  left: 0;
   top: 0;
   height: 100%;
   width: 380px; /* Fixed width for the side panel */
@@ -133,10 +145,10 @@
   padding: 2rem;
   background: rgba(20, 20, 20, 0.75);
   color: #eee; /* Light text for readability */
-  border-left: 1px solid rgba(255, 255, 255, 0.2);
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  box-shadow: inset 1px 1px 1px rgba(255, 255, 255, 0.2);
+  box-shadow: inset -1px 1px 1px rgba(255, 255, 255, 0.2);
   z-index: 15;
   transition: transform 0.3s ease-in-out;
 }
@@ -185,6 +197,38 @@
 
 .status-panel .instruction-text {
   font-size: 1.5rem;
+}
+
+.classifying-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.classifying-status h3 {
+  font-size: 1.2rem;
+  font-weight: 100;
+  text-align: center;
+  min-height: 40px; /* Prevent layout shift */
+}
+
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.fade-to-black {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #000;
+  z-index: 100;
 }
 
 .results {

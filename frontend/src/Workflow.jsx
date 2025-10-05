@@ -6,6 +6,7 @@ import { Hands, HAND_CONNECTIONS } from '@mediapipe/hands';
 import { drawConnectors, drawLandmarks } from '@mediapipe/drawing_utils';
 import { Camera } from '@mediapipe/camera_utils';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GridLoader } from 'react-spinners';
 import DarkVeil from './DarkVeil';
 import LoadingScreen from './LoadingScreen';
 
@@ -17,9 +18,9 @@ const initialState = {
   countdown: 3,
   imgFront: null,
   imgBack: null,
-  result: '',
   isLoading: false,
   handDetected: false,
+  isFadingToResults: false,
 };
 
 function workflowReducer(state, action) {
@@ -37,9 +38,12 @@ function workflowReducer(state, action) {
     case 'START_CLASSIFY':
       return { ...state, step: 'classifying', isLoading: true };
     case 'CLASSIFY_SUCCESS':
-      return { ...state, step: 'result', isLoading: false, result: action.payload };
+      // Instead of setting result, trigger fade out
+      localStorage.setItem('classificationResult', action.payload);
+      return { ...state, step: 'result', isLoading: false, isFadingToResults: true };
     case 'CLASSIFY_ERROR':
-      return { ...state, step: 'result', isLoading: false, result: 'Failed to classify.' };
+      localStorage.setItem('classificationResult', 'Failed to classify.');
+      return { ...state, step: 'result', isLoading: false, isFadingToResults: true };
     case 'SET_HAND_DETECTED':
       return { ...state, handDetected: action.payload };
     case 'RESET_WORKFLOW':
@@ -49,10 +53,24 @@ function workflowReducer(state, action) {
   }
 }
 
+const classifyingTexts = [
+  "initializing classification matrix...",
+  "cross-referencing visual markers...",
+  "analyzing imprint data...",
+  "querying pharmaceutical database...",
+  "verifying shape and color consistency...",
+  "deconstructing molecular appearance...",
+  "running spectral analysis simulation...",
+  "checking for coating anomalies...",
+  "finalizing identification vector...",
+  "compiling results...",
+];
+
 const Workflow = () => {
   const [state, dispatch] = useReducer(workflowReducer, initialState);
-  const { step, countdown, imgFront, imgBack, result, isLoading, handDetected } = state;
+  const { step, countdown, imgFront, imgBack, isLoading, handDetected, isFadingToResults } = state;
   const [isVideoLoading, setIsVideoLoading] = useState(true);
+  const [classifyingText, setClassifyingText] = useState(classifyingTexts[0]);
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -202,6 +220,13 @@ const Workflow = () => {
         }
       }, 200);
     } else if (step === 'classifying') {
+      // Handle dynamic text
+      let textIndex = 0;
+      const textInterval = setInterval(() => {
+        textIndex = (textIndex + 1) % classifyingTexts.length;
+        setClassifyingText(classifyingTexts[textIndex]);
+      }, 1000); // Change text every second
+
       const handleClassify = async () => {
         try {
           const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
@@ -212,19 +237,39 @@ const Workflow = () => {
           ];
           const result = await model.generateContent([prompt, ...imageParts]);
           const response = await result.response;
+          clearInterval(textInterval); // Stop changing text
           dispatch({ type: 'CLASSIFY_SUCCESS', payload: response.text() });
         } catch (error) {
           console.error("Classification error:", error);
+          clearInterval(textInterval); // Stop changing text
           dispatch({ type: 'CLASSIFY_ERROR' });
         }
       };
-      handleClassify();
+      
+      // Add a delay before starting classification to show the first message
+      setTimeout(handleClassify, 1000);
+
+      return () => clearInterval(textInterval);
     }
     return () => clearTimeout(timer);
   }, [step, countdown, capture, imgFront, imgBack]);
 
   return (
     <div className="workflow-container">
+      <AnimatePresence>
+        {isFadingToResults && (
+          <motion.div
+            className="fade-to-black"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            onAnimationComplete={() => {
+              window.location.hash = 'results';
+            }}
+          />
+        )}
+      </AnimatePresence>
+
       <div className="dark-veil-background">
         <DarkVeil speed={0.5} hueShift={10} noiseIntensity={0.1} scanlineFrequency={2} scanlineIntensity={0.1} warpAmount={2} />
       </div>
@@ -248,19 +293,19 @@ const Workflow = () => {
       </div>
       <AnimatePresence>
         {(imgFront || step === 'result') && (
-          <motion.div className="controls-container" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ ease: "easeInOut", duration: 0.5 }}>
+          <motion.div className="controls-container" initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ ease: "easeInOut", duration: 0.5 }}>
             <div className="captures">
               <div className="capture-slot"><p>front image</p>{imgFront ? <img src={imgFront} alt="Front" /> : <div className="placeholder" />}</div>
               <div className="capture-slot"><p>back image</p>{imgBack ? <img src={imgBack} alt="Back" /> : <div className="placeholder" />}</div>
             </div>
             <div className="status-panel">
               {step === 'prompt_classify' && <Instruction text="does this look clear?" showPrompt={true} promptType="classify" />}
-              {isLoading && <h3>classifying...</h3>}
-              {step === 'result' && result && (
-                <div className="results">
-                  <h3>classification result:</h3>
-                  <p>{result}</p>
-                  <Instruction text="press space to restart" showPrompt={false} />
+              {isLoading && (
+                <div className="classifying-status">
+                  <h3>{classifyingText}</h3>
+                  <div className="spinner-container">
+                    <GridLoader color={"#ffffff"} loading={true} size={15} speedMultiplier={0.2} />
+                  </div>
                 </div>
               )}
             </div>
@@ -277,7 +322,7 @@ const Instruction = ({ text, showPrompt, promptType = 'snap' }) => (
     {showPrompt && (
       <div className="instruction-prompt-container">
         {promptType === 'snap' && (
-          <div className="instruction-prompt">
+          <div className="instruction-prompt snap-prompt">
             press <span className="keyboard-key">space</span> to snap!
           </div>
         )}

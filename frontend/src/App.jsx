@@ -6,8 +6,9 @@ import { MdOutlineSpaceBar } from 'react-icons/md';
 import LiquidGlass from './LiquidGlass';
 import DarkVeil from './DarkVeil';
 import ModelViewer from './ModelViewer';
-import Workflow from './Workflow'; // Kept from your version
-import SplashCursor from './SplashCursor'; // Added from remote version
+import Workflow from './Workflow';
+import Results from './Results';
+import SplashCursor from './SplashCursor';
 import LoadingScreen from './LoadingScreen';
 
 function App() {
@@ -44,6 +45,10 @@ function App() {
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [isFadingOut, currentView]);
+
+  if (currentView === '#results') {
+    return <Results />;
+  }
 
   // Kept your routing logic
   if (currentView === '#workflow') {
