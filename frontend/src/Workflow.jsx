@@ -14,7 +14,7 @@ const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
 
 // --- State Management ---
 const initialState = {
-  step: 'prompt_front', // prompt_front, acknowledge, countdown, prompt_back, prompt_classify, classifying, result
+  step: 'prompt_front', // prompt_front, countdown, capturing, prompt_back, prompt_classify, classifying, result
   countdown: 3,
   imgFront: null,
   imgBack: null,
@@ -25,12 +25,12 @@ const initialState = {
 
 function workflowReducer(state, action) {
   switch (action.type) {
-    case 'START_CAPTURE':
-      return { ...state, step: 'acknowledge' };
     case 'START_COUNTDOWN':
       return { ...state, step: 'countdown' };
     case 'TICK_COUNTDOWN':
       return { ...state, countdown: state.countdown - 1 };
+    case 'START_CAPTURE':
+      return { ...state, step: 'capturing' };
     case 'CAPTURE_FRONT_SUCCESS':
       return { ...state, imgFront: action.payload, step: 'prompt_back', countdown: 3 };
     case 'CAPTURE_BACK_SUCCESS':
@@ -184,7 +184,7 @@ const Workflow = () => {
     const handleKeyDown = (e) => {
       if (e.code === 'Space') {
         e.preventDefault();
-        if (step === 'prompt_front' || step === 'prompt_back') dispatch({ type: 'START_CAPTURE' });
+        if (step === 'prompt_front' || step === 'prompt_back') dispatch({ type: 'START_COUNTDOWN' });
         else if (step === 'prompt_classify') dispatch({ type: 'START_CLASSIFY' });
         else if (step === 'result') dispatch({ type: 'RESET_WORKFLOW' });
       }
@@ -195,23 +195,24 @@ const Workflow = () => {
 
   useEffect(() => {
     let timer;
-    if (step === 'acknowledge') {
-      timer = setTimeout(() => dispatch({ type: 'START_COUNTDOWN' }), 200);
-    } else if (step === 'countdown' && countdown > 0) {
+    if (step === 'countdown' && countdown > 0) {
       timer = setTimeout(() => dispatch({ type: 'TICK_COUNTDOWN' }), 1000);
     } else if (step === 'countdown' && countdown === 0) {
-      const imageDataUrl = capture();
-      if (imageDataUrl) {
-        if (!imgFront) {
-          dispatch({ type: 'CAPTURE_FRONT_SUCCESS', payload: imageDataUrl });
+      dispatch({ type: 'START_CAPTURE' });
+    } else if (step === 'capturing') {
+      timer = setTimeout(() => {
+        const imageDataUrl = capture();
+        if (imageDataUrl) {
+          if (!imgFront) {
+            dispatch({ type: 'CAPTURE_FRONT_SUCCESS', payload: imageDataUrl });
+          } else {
+            dispatch({ type: 'CAPTURE_BACK_SUCCESS', payload: imageDataUrl });
+          }
         } else {
-          dispatch({ type: 'CAPTURE_BACK_SUCCESS', payload: imageDataUrl });
+          const resetStep = imgFront ? 'prompt_back' : 'prompt_front';
+          dispatch({ type: 'RESET_WORKFLOW', payload: { step: resetStep } });
         }
-      } else {
-        // If capture failed, reset to the appropriate prompt step
-        const resetStep = imgFront ? 'prompt_back' : 'prompt_front';
-        dispatch({ type: 'RESET_WORKFLOW', payload: { step: resetStep } });
-      }
+      }, 200); // Flash duration
     } else if (step === 'classifying') {
       const handleClassify = async () => {
         try {
@@ -257,7 +258,7 @@ const Workflow = () => {
               <Instruction text={step === 'prompt_front' ? "hold up the front of the pill" : "hold up the back of the pill"} showPrompt={handDetected} />
             </motion.div>
           )}
-          {step === 'acknowledge' && (
+          {step === 'capturing' && (
              <motion.div className="camera-overlay-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><div className="acknowledge-flash" /></motion.div>
           )}
         </AnimatePresence>
