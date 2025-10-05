@@ -289,16 +289,25 @@ const Workflow = () => {
             </motion.div>
           )}
           {step === 'capturing' && (
-            <motion.div className="camera-overlay-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <div className="acknowledge-flash" />
-            </motion.div>
+            <motion.div
+              className="acknowledge-flash"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0.8, 0] }}
+              transition={{ duration: 0.4, times: [0, 1] }}
+            />
           )}
         </AnimatePresence>
         {step === 'countdown' && (<div className="countdown-container"><div className="countdown-text">{countdown}</div></div>)}
       </div>
       <AnimatePresence>
         {(imgFront || step === 'result') && (
-          <motion.div className="controls-container" initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ ease: "easeInOut", duration: 0.5 }}>
+          <motion.div 
+            className="controls-container" 
+            initial={{ x: "-100%", opacity: 0 }} 
+            animate={{ x: 0, opacity: 1 }} 
+            exit={{ x: "-100%", opacity: 0 }} 
+            transition={{ type: "spring", stiffness: 260, damping: 30 }}
+          >
             <div className="captures">
               <div className="capture-slot"><p>front image</p>{imgFront ? <img src={imgFront} alt="Front" /> : <div className="placeholder" />}</div>
               <div className="capture-slot"><p>back image</p>{imgBack ? <img src={imgBack} alt="Back" /> : <div className="placeholder" />}</div>
