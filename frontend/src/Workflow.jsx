@@ -9,10 +9,8 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import DarkVeil from './DarkVeil';
 import LoadingScreen from './LoadingScreen';
 
-const genAI = new GoogleGenerativeAI({
-  apiKey: import.meta.env.VITE_GEMINI_API_KEY,
-  httpOptions: { apiVersion: 'v1' },
-});
+console.log("API Key:", import.meta.env.VITE_GEMINI_API_KEY);
+const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
 
 const initialState = {
   step: 'prompt_front',
@@ -206,7 +204,7 @@ const Workflow = () => {
     } else if (step === 'classifying') {
       const handleClassify = async () => {
         try {
-          const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-latest" });
+          const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
           const prompt = "Analyze the following two images of the same pill (front and back). Describe its physical characteristics (shape, color, markings). Based *only* on the visual information, what medication does the imprint suggest this might be? Frame the response as a visual analysis, not medical advice.";
           const imageParts = [
             fileToGenerativePart(imgFront, "image/jpeg"),
