@@ -6,6 +6,7 @@ import { Hands, HAND_CONNECTIONS } from '@mediapipe/hands';
 import { drawConnectors, drawLandmarks } from '@mediapipe/drawing_utils';
 import { Camera } from '@mediapipe/camera_utils';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import DarkVeil from './DarkVeil';
 
 // --- Gemini AI Setup ---
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
@@ -72,8 +73,8 @@ const Workflow = () => {
     if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
       dispatch({ type: 'SET_HAND_DETECTED', payload: true });
       for (const landmarks of results.multiHandLandmarks) {
-        drawConnectors(ctx, landmarks, HAND_CONNECTIONS, { color: '#00FF00', lineWidth: 5 });
-        drawLandmarks(ctx, landmarks, { color: '#FF0000', lineWidth: 2 });
+        drawConnectors(ctx, landmarks, HAND_CONNECTIONS, { color: '#ADD8E6', lineWidth: 5 });
+        drawLandmarks(ctx, landmarks, { color: '#FFFFFF', lineWidth: 2 });
       }
       
       const landmarks = results.multiHandLandmarks[0];
@@ -87,16 +88,22 @@ const Workflow = () => {
         if (y > y_max) y_max = y;
       }
 
-      const padding = 30;
+      const padding = 50; // Increased padding
       x_min = Math.max(0, x_min - padding);
       y_min = Math.max(0, y_min - padding);
       x_max = Math.min(canvas.width, x_max + padding);
       y_max = Math.min(canvas.height, y_max + padding);
       
-      const flipped_x_min = canvas.width - x_max;
-      const flipped_x_max = canvas.width - x_min;
+      // Store the original, unflipped coordinates for the capture function
+      boundingBoxRef.current = { x_min, y_min, x_max, y_max };
 
-      boundingBoxRef.current = { x_min: flipped_x_min, y_min, x_max: flipped_x_max, y_max };
+      // Draw the bounding box on the flipped canvas
+      ctx.strokeStyle = 'rgba(150, 150, 150, 0.8)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([10, 10]); // Dashed line
+      const flipped_x_min = canvas.width - x_max; // Flip coordinates for drawing
+      ctx.strokeRect(flipped_x_min, y_min, (x_max - x_min), (y_max - y_min));
+      ctx.setLineDash([]); // Reset line dash
 
     } else {
       dispatch({ type: 'SET_HAND_DETECTED', payload: false });
@@ -222,6 +229,16 @@ const Workflow = () => {
 
   return (
     <div className="workflow-container">
+      <div className="dark-veil-background">
+        <DarkVeil
+          speed={0.5}
+          hueShift={10}
+          noiseIntensity={0.1}
+          scanlineFrequency={2}
+          scanlineIntensity={0.1}
+          warpAmount={2}
+        />
+      </div>
       <div className="camera-container">
         <video ref={videoRef} className="webcam-stream" autoPlay playsInline></video>
         <canvas ref={canvasRef} className="webcam-overlay" width="1280" height="720"></canvas>
@@ -229,7 +246,7 @@ const Workflow = () => {
         <AnimatePresence>
           {(step === 'prompt_front' || step === 'prompt_back') && (
             <motion.div className="camera-overlay-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <Instruction text={step === 'prompt_front' ? "Hold up the FRONT of the pill" : "Hold up the BACK of the pill"} showPrompt={handDetected} />
+              <Instruction text={step === 'prompt_front' ? "hold up the front of the pill" : "hold up the back of the pill"} showPrompt={handDetected} />
             </motion.div>
           )}
           {step === 'acknowledge' && (
@@ -248,17 +265,17 @@ const Workflow = () => {
             transition={{ ease: "easeInOut", duration: 0.5 }}
           >
             <div className="captures">
-              <div className="capture-slot"><p>Front Image</p>{imgFront ? <img src={imgFront} alt="Front" /> : <div className="placeholder" />}</div>
-              <div className="capture-slot"><p>Back Image</p>{imgBack ? <img src={imgBack} alt="Back" /> : <div className="placeholder" />}</div>
+              <div className="capture-slot"><p>front image</p>{imgFront ? <img src={imgFront} alt="Front" /> : <div className="placeholder" />}</div>
+              <div className="capture-slot"><p>back image</p>{imgBack ? <img src={imgBack} alt="Back" /> : <div className="placeholder" />}</div>
             </div>
             <div className="status-panel">
-              {step === 'prompt_classify' && <Instruction text="Ready to Classify" showPrompt={true} />}
-              {isLoading && <h3>Classifying...</h3>}
+              {step === 'prompt_classify' && <Instruction text="ready to classify" showPrompt={true} />}
+              {isLoading && <h3>classifying...</h3>}
               {step === 'result' && result && (
                 <div className="results">
-                  <h3>Classification Result:</h3>
+                  <h3>classification result:</h3>
                   <p>{result}</p>
-                  <Instruction text="Press Space to restart" showPrompt={false} />
+                  <Instruction text="press space to restart" showPrompt={false} />
                 </div>
               )}
             </div>
@@ -272,7 +289,11 @@ const Workflow = () => {
 const Instruction = ({ text, showPrompt }) => (
   <div className="instruction-text">
     {text}
-    {showPrompt && <div className="instruction-prompt">Press <MdOutlineSpaceBar /> to continue</div>}
+    {showPrompt && (
+      <div className="instruction-prompt">
+        press <span className="keyboard-key">space</span> to snap!
+      </div>
+    )}
   </div>
 );
 

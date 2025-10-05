@@ -1,11 +1,21 @@
 .workflow-container {
   width: 100vw;
   height: 100vh;
-  background-color: #000;
+  background-color: transparent;
   color: #fff;
-  font-family: 'Inter', sans-serif;
   position: relative;
   overflow: hidden;
+  text-transform: lowercase;
+}
+
+.dark-veil-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  opacity: 0.3;
 }
 
 .camera-container {
@@ -17,7 +27,7 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) scaleX(-1);
+  transform: translate(-50%, -50%);
   min-width: 100%;
   min-height: 100%;
   width: auto;
@@ -38,7 +48,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: transparent;
   z-index: 10;
   pointer-events: none;
 }
@@ -58,7 +68,7 @@
 
 .countdown-text {
   font-size: 15rem;
-  font-weight: 900;
+  font-weight: 100;
   color: rgba(255, 255, 255, 0.9);
   text-shadow: 0 0 50px rgba(0, 0, 0, 0.7);
 }
@@ -72,7 +82,7 @@
 .instruction-text {
   text-align: center;
   font-size: 2.5rem;
-  font-weight: 700;
+  font-weight: 100;
   color: white;
   text-shadow: 0 2px 10px rgba(0,0,0,0.5);
 }
@@ -84,13 +94,25 @@
   gap: 0.5rem;
   margin-top: 1.5rem;
   font-size: 1.2rem;
-  font-weight: 400;
+  font-weight: 100;
   color: #ccc;
-  background-color: rgba(20, 20, 20, 0.85);
+  background: rgba(20, 20, 20, 0.75);
   padding: 0.75rem 1.25rem;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  border-radius: 50px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: inset 1px 1px 1px rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.keyboard-key {
+  display: inline-block;
+  padding: 0.3rem 0.6rem;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: inset 1px 1px 1px rgba(255, 255, 255, 0.4);
+  font-weight: 400;
+  color: white;
 }
 
 .controls-container {
@@ -102,9 +124,11 @@
   display: flex;
   flex-direction: column;
   padding: 2rem;
-  background-color: rgba(26, 26, 26, 0.85);
+  background: rgba(20, 20, 20, 0.75);
   border-left: 1px solid #333;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: inset 1px 1px 1px rgba(255, 255, 255, 0.2);
   z-index: 15;
   transition: transform 0.3s ease-in-out;
 }
@@ -133,30 +157,39 @@
 
 .capture-slot img,
 .capture-slot .placeholder {
-  width: 100%;
-  height: auto;
+  width: 150px;  /* Reduced from 100% */
+  height: 150px; /* Set a fixed height */
   aspect-ratio: 1 / 1;
   border-radius: 8px;
   border: 2px dashed #444;
   margin-bottom: 1rem;
   object-fit: cover;
   background-color: #222;
+  transform: scaleX(-1); /* Flip the image */
 }
 
 .status-panel {
-  margin-top: auto;
-  padding-top: 2rem;
+  margin-top: 1rem; /* Reduced from auto */
+  padding-top: 1rem; /* Reduced from 2rem */
   border-top: 1px solid #333;
   text-align: center;
 }
 
+.status-panel .instruction-text {
+  font-size: 1.5rem; /* Reduced from 2.5rem */
+}
+
 .results {
   padding: 1.5rem;
-  background-color: rgba(10, 10, 10, 0.8);
-  border-radius: 8px;
+  background: rgba(20, 20, 20, 0.75);
+  border-radius: 12px;
   text-align: left;
   max-height: 40vh;
   overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: inset 1px 1px 1px rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
 .results h3 {
