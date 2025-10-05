@@ -7,6 +7,7 @@ import { drawConnectors, drawLandmarks } from '@mediapipe/drawing_utils';
 import { Camera } from '@mediapipe/camera_utils';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import DarkVeil from './DarkVeil';
+import LoadingScreen from './LoadingScreen';
 
 // --- Gemini AI Setup ---
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
@@ -53,6 +54,7 @@ function workflowReducer(state, action) {
 const Workflow = () => {
   const [state, dispatch] = useReducer(workflowReducer, initialState);
   const { step, countdown, imgFront, imgBack, result, isLoading, handDetected } = state;
+  const [isVideoLoading, setIsVideoLoading] = useState(true);
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -101,8 +103,7 @@ const Workflow = () => {
       ctx.strokeStyle = 'rgba(150, 150, 150, 0.8)';
       ctx.lineWidth = 2;
       ctx.setLineDash([10, 10]); // Dashed line
-      const flipped_x_min = canvas.width - x_max; // Flip coordinates for drawing
-      ctx.strokeRect(flipped_x_min, y_min, (x_max - x_min), (y_max - y_min));
+      ctx.strokeRect(x_min, y_min, (x_max - x_min), (y_max - y_min));
       ctx.setLineDash([]); // Reset line dash
 
     } else {
@@ -124,16 +125,22 @@ const Workflow = () => {
     });
     handsRef.current.onResults(onResults);
 
-    if (videoRef.current) {
-      const camera = new Camera(videoRef.current, {
+    const videoElement = videoRef.current;
+    if (videoElement) {
+      const camera = new Camera(videoElement, {
         onFrame: async () => {
-          if (videoRef.current) {
-            await handsRef.current.send({ image: videoRef.current });
+          if (videoElement) {
+            await handsRef.current.send({ image: videoElement });
           }
         },
         width: 1280,
         height: 720,
       });
+
+      videoElement.oncanplay = () => {
+        setIsVideoLoading(false);
+      };
+
       camera.start();
     }
     return () => {
@@ -240,11 +247,12 @@ const Workflow = () => {
         />
       </div>
       <div className="camera-container">
-        <video ref={videoRef} className="webcam-stream" autoPlay playsInline></video>
-        <canvas ref={canvasRef} className="webcam-overlay" width="1280" height="720"></canvas>
+        {isVideoLoading && <LoadingScreen />}
+        <video ref={videoRef} className="webcam-stream" autoPlay playsInline style={{ display: 'none' }}></video>
+        <canvas ref={canvasRef} className="webcam-overlay" width="1280" height="720" style={{ opacity: isVideoLoading ? 0 : 1 }}></canvas>
         
         <AnimatePresence>
-          {(step === 'prompt_front' || step === 'prompt_back') && (
+          {(!isVideoLoading && (step === 'prompt_front' || step === 'prompt_back')) && (
             <motion.div className="camera-overlay-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <Instruction text={step === 'prompt_front' ? "hold up the front of the pill" : "hold up the back of the pill"} showPrompt={handDetected} />
             </motion.div>
