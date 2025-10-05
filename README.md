@@ -1,6 +1,6 @@
 # clarity
 
-identify unknown pills with 95%+ accuracy—no test kits required.
+identify unknown pills at high accuracy with no test kits required.
 
 watch the demo [here](https://www.youtube.com/watch?v=oshql8OMbx4)!
 
