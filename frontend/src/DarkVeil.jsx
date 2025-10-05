@@ -71,7 +71,7 @@ void main(){
     float gray = dot(col.rgb, vec3(0.299, 0.587, 0.114));
     
     // Increase brightness and add a faint blue tint
-    vec3 whiteVersion = vec3(gray) * 1.5; // Brightness multiplier
+    vec3 whiteVersion = vec3(gray) * 6.5; // Brightness multiplier
     whiteVersion *= vec3(0.95, 0.98, 1.0); // Tint: slightly less red/green, full blue
 
     // Apply effects to the white version
