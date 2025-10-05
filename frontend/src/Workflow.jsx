@@ -110,17 +110,21 @@ const Workflow = () => {
       }
       
       const landmarks = results.multiHandLandmarks[0];
-      let x_min = canvas.width, y_min = canvas.height, x_max = 0, y_max = 0;
-      for (const landmark of landmarks) {
-        const x = landmark.x * canvas.width;
-        const y = landmark.y * canvas.height;
-        if (x < x_min) x_min = x;
-        if (y < y_min) y_min = y;
-        if (x > x_max) x_max = x;
-        if (y > y_max) y_max = y;
-      }
+      // Focus on thumb and index finger tips for a smaller box
+      const thumbTip = landmarks[4];
+      const indexTip = landmarks[8];
 
-      const padding = 50;
+      const x1 = thumbTip.x * canvas.width;
+      const y1 = thumbTip.y * canvas.height;
+      const x2 = indexTip.x * canvas.width;
+      const y2 = indexTip.y * canvas.height;
+
+      let x_min = Math.min(x1, x2);
+      let y_min = Math.min(y1, y2);
+      let x_max = Math.max(x1, x2);
+      let y_max = Math.max(y1, y2);
+
+      const padding = 75; // Adjusted padding for the smaller area
       x_min = Math.max(0, x_min - padding);
       y_min = Math.max(0, y_min - padding);
       x_max = Math.min(canvas.width, x_max + padding);
