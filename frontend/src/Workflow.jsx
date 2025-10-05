@@ -55,15 +55,32 @@ function workflowReducer(state, action) {
 
 const classifyingTexts = [
   "initializing classification matrix...",
+  "authenticating with neural network...",
+  "establishing secure data link...",
   "cross-referencing visual markers...",
   "analyzing imprint data...",
-  "querying pharmaceutical database...",
+  "querying pharmaceutical database (US)...",
+  "querying pharmaceutical database (EU)...",
   "verifying shape and color consistency...",
   "deconstructing molecular appearance...",
   "running spectral analysis simulation...",
+  "calibrating optical character recognition...",
   "checking for coating anomalies...",
+  "validating pill scorer geometry...",
+  "comparing against known formulations...",
+  "rendering 3d model for comparison...",
+  "scanning for micro-imprints...",
+  "evaluating surface texture...",
+  "cross-checking against FDA registry...",
+  "analyzing light refraction properties...",
   "finalizing identification vector...",
+  "generating confidence score...",
+  "performing peer-review check...",
   "compiling results...",
+  "encrypting report...",
+  "preparing final report...",
+  "almost there...",
+  "classification complete.",
 ];
 
 const Workflow = () => {
@@ -304,7 +321,7 @@ const Workflow = () => {
                 <div className="classifying-status">
                   <h3>{classifyingText}</h3>
                   <div className="spinner-container">
-                    <GridLoader color={"#ffffff"} loading={true} size={15} speedMultiplier={0.2} />
+                    <GridLoader color={"#ffffff"} loading={true} size={15} speedMultiplier={0.1} />
                   </div>
                 </div>
               )}
