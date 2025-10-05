@@ -10,7 +10,6 @@ import { GridLoader } from 'react-spinners';
 import DarkVeil from './DarkVeil';
 import LoadingScreen from './LoadingScreen';
 
-console.log("API Key:", import.meta.env.VITE_GEMINI_API_KEY);
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
 
 const initialState = {
@@ -20,7 +19,7 @@ const initialState = {
   imgBack: null,
   isLoading: false,
   handDetected: false,
-  isFadingToResults: false,
+  classificationResult: null,
 };
 
 function workflowReducer(state, action) {
@@ -36,14 +35,11 @@ function workflowReducer(state, action) {
     case 'CAPTURE_BACK_SUCCESS':
       return { ...state, imgBack: action.payload, step: 'prompt_classify', countdown: 3 };
     case 'START_CLASSIFY':
-      return { ...state, step: 'classifying', isLoading: true };
+      return { ...state, step: 'classifying', isLoading: true, classificationResult: null };
     case 'CLASSIFY_SUCCESS':
-      // Instead of setting result, trigger fade out
-      localStorage.setItem('classificationResult', action.payload);
-      return { ...state, step: 'result', isLoading: false, isFadingToResults: true };
+      return { ...state, step: 'result', isLoading: false, classificationResult: action.payload };
     case 'CLASSIFY_ERROR':
-      localStorage.setItem('classificationResult', 'Failed to classify.');
-      return { ...state, step: 'result', isLoading: false, isFadingToResults: true };
+      return { ...state, step: 'result', isLoading: false, classificationResult: 'Failed to classify.|||Please try again.|||0' };
     case 'SET_HAND_DETECTED':
       return { ...state, handDetected: action.payload };
     case 'RESET_WORKFLOW':
@@ -85,7 +81,7 @@ const classifyingTexts = [
 
 const Workflow = () => {
   const [state, dispatch] = useReducer(workflowReducer, initialState);
-  const { step, countdown, imgFront, imgBack, isLoading, handDetected, isFadingToResults } = state;
+  const { step, countdown, imgFront, imgBack, isLoading, handDetected, classificationResult } = state;
   const [isVideoLoading, setIsVideoLoading] = useState(true);
   const [classifyingText, setClassifyingText] = useState(classifyingTexts[0]);
 
@@ -247,7 +243,7 @@ const Workflow = () => {
       const handleClassify = async () => {
         try {
           const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
-          const prompt = "Analyze the following two images of the same pill (front and back). Describe its physical characteristics (shape, color, markings). Based *only* on the visual information, what medication does the imprint suggest this might be? Frame the response as a visual analysis, not medical advice.";
+          const prompt = "Analyze the pill in the images. Based on its color, identify if it is Advil (typically orange) or Tylenol (typically white). Provide a detailed description of the identified medication, including its common uses, active ingredients, and typical dosage. Finally, provide a confidence score for your identification as a percentage. Format your response as follows: [Pill Name]|||[Detailed Description]|||[Confidence Score %]";
           const imageParts = [
             fileToGenerativePart(imgFront, "image/jpeg"),
             fileToGenerativePart(imgBack, "image/jpeg"),
@@ -271,22 +267,10 @@ const Workflow = () => {
     return () => clearTimeout(timer);
   }, [step, countdown, capture, imgFront, imgBack]);
 
+  const [pillName, , confidence] = classificationResult ? classificationResult.split('|||') : ['','',''];
+
   return (
     <div className="workflow-container">
-      <AnimatePresence>
-        {isFadingToResults && (
-          <motion.div
-            className="fade-to-black"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-            onAnimationComplete={() => {
-              window.location.hash = 'results';
-            }}
-          />
-        )}
-      </AnimatePresence>
-
       <div className="dark-veil-background">
         <DarkVeil speed={0.5} hueShift={10} noiseIntensity={0.1} scanlineFrequency={2} scanlineIntensity={0.1} warpAmount={2} />
       </div>
@@ -325,6 +309,13 @@ const Workflow = () => {
                   </div>
                 </div>
               )}
+              {classificationResult && !isLoading && (
+                <div className="classification-result">
+                  <h2>{pillName}</h2>
+                  <p>Confidence: {confidence}</p>
+                  <Instruction text="" showPrompt={true} promptType="result" />
+                </div>
+              )}
             </div>
           </motion.div>
         )}
@@ -352,6 +343,11 @@ const Instruction = ({ text, showPrompt, promptType = 'snap' }) => (
               press <span className="keyboard-key">r</span> to restart
             </div>
           </>
+        )}
+        {promptType === 'result' && (
+            <div className="instruction-prompt">
+              press <span className="keyboard-key">r</span> to restart
+            </div>
         )}
       </div>
     )}
