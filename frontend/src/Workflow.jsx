@@ -9,12 +9,13 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import DarkVeil from './DarkVeil';
 import LoadingScreen from './LoadingScreen';
 
-// --- Gemini AI Setup ---
-const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
+const genAI = new GoogleGenerativeAI({
+  apiKey: import.meta.env.VITE_GEMINI_API_KEY,
+  httpOptions: { apiVersion: 'v1' },
+});
 
-// --- State Management ---
 const initialState = {
-  step: 'prompt_front', // prompt_front, countdown, capturing, prompt_back, prompt_classify, classifying, result
+  step: 'prompt_front',
   countdown: 3,
   imgFront: null,
   imgBack: null,
@@ -44,13 +45,12 @@ function workflowReducer(state, action) {
     case 'SET_HAND_DETECTED':
       return { ...state, handDetected: action.payload };
     case 'RESET_WORKFLOW':
-        return { ...initialState };
+      return { ...initialState };
     default:
       throw new Error(`Unhandled action type: ${action.type}`);
   }
 }
 
-// --- Main Component ---
 const Workflow = () => {
   const [state, dispatch] = useReducer(workflowReducer, initialState);
   const { step, countdown, imgFront, imgBack, result, isLoading, handDetected } = state;
@@ -60,6 +60,7 @@ const Workflow = () => {
   const canvasRef = useRef(null);
   const handsRef = useRef(null);
   const boundingBoxRef = useRef(null);
+
   const onResults = useCallback((results) => {
     const canvas = canvasRef.current;
     const video = videoRef.current;
@@ -68,7 +69,7 @@ const Workflow = () => {
     const ctx = canvas.getContext('2d');
     ctx.save();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.scale(-1, 1); // Flip horizontally
+    ctx.scale(-1, 1);
     ctx.translate(-canvas.width, 0);
     ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
 
@@ -90,21 +91,19 @@ const Workflow = () => {
         if (y > y_max) y_max = y;
       }
 
-      const padding = 50; // Increased padding
+      const padding = 50;
       x_min = Math.max(0, x_min - padding);
       y_min = Math.max(0, y_min - padding);
       x_max = Math.min(canvas.width, x_max + padding);
       y_max = Math.min(canvas.height, y_max + padding);
       
-      // Store the original, unflipped coordinates for the capture function
       boundingBoxRef.current = { x_min, y_min, x_max, y_max };
 
-      // Draw the bounding box on the flipped canvas
       ctx.strokeStyle = 'rgba(150, 150, 150, 0.8)';
       ctx.lineWidth = 2;
-      ctx.setLineDash([10, 10]); // Dashed line
+      ctx.setLineDash([10, 10]);
       ctx.strokeRect(x_min, y_min, (x_max - x_min), (y_max - y_min));
-      ctx.setLineDash([]); // Reset line dash
+      ctx.setLineDash([]);
 
     } else {
       dispatch({ type: 'SET_HAND_DETECTED', payload: false });
@@ -137,17 +136,14 @@ const Workflow = () => {
         height: 720,
       });
 
-      videoElement.oncanplay = () => {
-        setIsVideoLoading(false);
-      };
-
+      videoElement.oncanplay = () => setIsVideoLoading(false);
       camera.start();
     }
     return () => {
-        if (handsRef.current) {
-            handsRef.current.close();
-        }
-    }
+      if (handsRef.current) {
+        handsRef.current.close();
+      }
+    };
   }, [onResults]);
 
   const capture = useCallback(() => {
@@ -158,27 +154,18 @@ const Workflow = () => {
     const video = videoRef.current;
     const box = boundingBoxRef.current;
     const tempCanvas = document.createElement('canvas');
-    
     const sWidth = box.x_max - box.x_min;
     const sHeight = box.y_max - box.y_min;
-
     tempCanvas.width = sWidth;
     tempCanvas.height = sHeight;
     const context = tempCanvas.getContext('2d');
-    
     context.drawImage(video, box.x_min, box.y_min, sWidth, sHeight, 0, 0, sWidth, sHeight);
-    
     return tempCanvas.toDataURL('image/jpeg');
   }, [handDetected]);
 
-  const fileToGenerativePart = (dataUrl, mimeType) => {
-    return {
-      inlineData: {
-        data: dataUrl.split(',')[1],
-        mimeType
-      },
-    };
-  }
+  const fileToGenerativePart = (dataUrl, mimeType) => ({
+    inlineData: { data: dataUrl.split(',')[1], mimeType },
+  });
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -187,6 +174,9 @@ const Workflow = () => {
         if (step === 'prompt_front' || step === 'prompt_back') dispatch({ type: 'START_COUNTDOWN' });
         else if (step === 'prompt_classify') dispatch({ type: 'START_CLASSIFY' });
         else if (step === 'result') dispatch({ type: 'RESET_WORKFLOW' });
+      } else if (e.code === 'KeyR' && (step === 'prompt_classify' || step === 'result')) {
+        e.preventDefault();
+        dispatch({ type: 'RESET_WORKFLOW' });
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -212,11 +202,11 @@ const Workflow = () => {
           const resetStep = imgFront ? 'prompt_back' : 'prompt_front';
           dispatch({ type: 'RESET_WORKFLOW', payload: { step: resetStep } });
         }
-      }, 200); // Flash duration
+      }, 200);
     } else if (step === 'classifying') {
       const handleClassify = async () => {
         try {
-          const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
+          const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-latest" });
           const prompt = "Analyze the following two images of the same pill (front and back). Describe its physical characteristics (shape, color, markings). Based *only* on the visual information, what medication does the imprint suggest this might be? Frame the response as a visual analysis, not medical advice.";
           const imageParts = [
             fileToGenerativePart(imgFront, "image/jpeg"),
@@ -238,20 +228,12 @@ const Workflow = () => {
   return (
     <div className="workflow-container">
       <div className="dark-veil-background">
-        <DarkVeil
-          speed={0.5}
-          hueShift={10}
-          noiseIntensity={0.1}
-          scanlineFrequency={2}
-          scanlineIntensity={0.1}
-          warpAmount={2}
-        />
+        <DarkVeil speed={0.5} hueShift={10} noiseIntensity={0.1} scanlineFrequency={2} scanlineIntensity={0.1} warpAmount={2} />
       </div>
       <div className="camera-container">
         {isVideoLoading && <LoadingScreen />}
         <video ref={videoRef} className="webcam-stream" autoPlay playsInline style={{ display: 'none' }}></video>
         <canvas ref={canvasRef} className="webcam-overlay" width="1280" height="720" style={{ opacity: isVideoLoading ? 0 : 1 }}></canvas>
-        
         <AnimatePresence>
           {(!isVideoLoading && (step === 'prompt_front' || step === 'prompt_back')) && (
             <motion.div className="camera-overlay-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -259,26 +241,22 @@ const Workflow = () => {
             </motion.div>
           )}
           {step === 'capturing' && (
-             <motion.div className="camera-overlay-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><div className="acknowledge-flash" /></motion.div>
+            <motion.div className="camera-overlay-content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <div className="acknowledge-flash" />
+            </motion.div>
           )}
         </AnimatePresence>
         {step === 'countdown' && (<div className="countdown-container"><div className="countdown-text">{countdown}</div></div>)}
       </div>
       <AnimatePresence>
         {(imgFront || step === 'result') && (
-          <motion.div 
-            className="controls-container"
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ ease: "easeInOut", duration: 0.5 }}
-          >
+          <motion.div className="controls-container" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ ease: "easeInOut", duration: 0.5 }}>
             <div className="captures">
               <div className="capture-slot"><p>front image</p>{imgFront ? <img src={imgFront} alt="Front" /> : <div className="placeholder" />}</div>
               <div className="capture-slot"><p>back image</p>{imgBack ? <img src={imgBack} alt="Back" /> : <div className="placeholder" />}</div>
             </div>
             <div className="status-panel">
-              {step === 'prompt_classify' && <Instruction text="ready to classify" showPrompt={true} />}
+              {step === 'prompt_classify' && <Instruction text="does this look clear?" showPrompt={true} promptType="classify" />}
               {isLoading && <h3>classifying...</h3>}
               {step === 'result' && result && (
                 <div className="results">
@@ -295,12 +273,26 @@ const Workflow = () => {
   );
 };
 
-const Instruction = ({ text, showPrompt }) => (
+const Instruction = ({ text, showPrompt, promptType = 'snap' }) => (
   <div className="instruction-text">
     {text}
     {showPrompt && (
-      <div className="instruction-prompt">
-        press <span className="keyboard-key">space</span> to snap!
+      <div className="instruction-prompt-container">
+        {promptType === 'snap' && (
+          <div className="instruction-prompt">
+            press <span className="keyboard-key">space</span> to snap!
+          </div>
+        )}
+        {promptType === 'classify' && (
+          <>
+            <div className="instruction-prompt">
+              press <span className="keyboard-key">space</span> to continue
+            </div>
+            <div className="instruction-prompt">
+              press <span className="keyboard-key">r</span> to restart
+            </div>
+          </>
+        )}
       </div>
     )}
   </div>

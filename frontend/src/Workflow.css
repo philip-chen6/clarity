@@ -27,10 +27,11 @@
   height: 90vh;
   max-width: 1280px;
   max-height: 720px;
-  border-radius: 20px;
-  overflow: hidden;
-  border: 2px solid rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.4);
   box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  border-radius: 12px;
+  overflow: hidden;
+  z-index: 6;
 }
 
 .webcam-stream, .webcam-overlay {
@@ -107,7 +108,6 @@
   padding: 0.75rem 1.25rem;
   border-radius: 50px;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: inset 1px 1px 1px rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }
@@ -132,7 +132,8 @@
   flex-direction: column;
   padding: 2rem;
   background: rgba(20, 20, 20, 0.75);
-  border-left: 1px solid #333;
+  color: #eee; /* Light text for readability */
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   box-shadow: inset 1px 1px 1px rgba(255, 255, 255, 0.2);
@@ -159,42 +160,42 @@
 .capture-slot p {
   margin-bottom: 0.75rem;
   font-weight: 500;
-  color: #aaa;
+  color: #ccc; /* Light gray text */
 }
 
 .capture-slot img,
 .capture-slot .placeholder {
-  width: 150px;  /* Reduced from 100% */
-  height: 150px; /* Set a fixed height */
+  width: 150px;
+  height: 150px;
   aspect-ratio: 1 / 1;
   border-radius: 8px;
-  border: 2px dashed #444;
+  border: 2px dashed rgba(255, 255, 255, 0.4); /* White dashed border */
   margin-bottom: 1rem;
   object-fit: cover;
-  background-color: #222;
+  background-color: rgba(255, 255, 255, 0.05); /* Subtle background */
   transform: scaleX(-1); /* Flip the image */
 }
 
 .status-panel {
-  margin-top: 1rem; /* Reduced from auto */
-  padding-top: 1rem; /* Reduced from 2rem */
-  border-top: 1px solid #333;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.2); /* White divider */
   text-align: center;
 }
 
 .status-panel .instruction-text {
-  font-size: 1.5rem; /* Reduced from 2.5rem */
+  font-size: 1.5rem;
 }
 
 .results {
   padding: 1.5rem;
-  background: rgba(20, 20, 20, 0.75);
+  background: rgba(0, 0, 0, 0.2); /* Darker background */
   border-radius: 12px;
   text-align: left;
   max-height: 40vh;
   overflow-y: auto;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: inset 1px 1px 1px rgba(255, 255, 255, 0.2);
+  box-shadow: inset 1px 1px 1px rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }
@@ -202,10 +203,11 @@
 .results h3 {
   margin-top: 0;
   margin-bottom: 1rem;
+  color: #fff;
 }
 
 .results p {
   white-space: pre-wrap;
   line-height: 1.6;
-  color: #ddd;
+  color: #eee; /* Light text */
 }
