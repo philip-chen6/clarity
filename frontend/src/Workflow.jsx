@@ -301,12 +301,12 @@ const Workflow = () => {
       </div>
       <AnimatePresence>
         {(imgFront || step === 'result') && (
-          <motion.div 
-            className="controls-container" 
-            initial={{ x: "-100%", opacity: 0 }} 
-            animate={{ x: 0, opacity: 1 }} 
-            exit={{ x: "-100%", opacity: 0 }} 
-            transition={{ type: "spring", stiffness: 260, damping: 30 }}
+          <motion.div
+            className="controls-container"
+            initial={{ x: "-100%", opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: "-100%", opacity: 0 }}
+            transition={{ type: "tween", ease: "easeInOut", duration: 0.5 }}
           >
             <div className="captures">
               <div className="capture-slot"><p>front image</p>{imgFront ? <img src={imgFront} alt="Front" /> : <div className="placeholder" />}</div>
