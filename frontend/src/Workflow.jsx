@@ -6,7 +6,7 @@ import { Hands, HAND_CONNECTIONS } from '@mediapipe/hands';
 import { drawConnectors, drawLandmarks } from '@mediapipe/drawing_utils';
 import { Camera } from '@mediapipe/camera_utils';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { GridLoader } from 'react-spinners';
+import { PropagateLoader } from 'react-spinners';
 import DarkVeil from './DarkVeil';
 import LoadingScreen from './LoadingScreen';
 
@@ -309,7 +309,7 @@ const Workflow = () => {
                 <div className="classifying-status">
                   <h3>{classifyingText}</h3>
                   <div className="spinner-container">
-                    <GridLoader color={"#ffffff"} loading={true} size={15} speedMultiplier={0.1} />
+                    <PropagateLoader color={"#ffffff"} loading={true} />
                   </div>
                 </div>
               )}
